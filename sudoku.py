@@ -395,6 +395,7 @@ def evolve_sudoku(init_func, gens, pop_size, fitness, tournament, cross_func, mu
     for pop in pop_list:
         pop_with_fit.append((pop, fitness(pop)))
     # Iterate
+
     for i in range(gens):
         # Parent Selection
         mate_pool = tournament(pop_with_fit)
@@ -414,9 +415,10 @@ def evolve_sudoku(init_func, gens, pop_size, fitness, tournament, cross_func, mu
         # New population
         pop_with_fit = elitism(pop_with_fit, descendents)
         current_best = best_pop(pop_with_fit)
-        print("Best Pop: " + str(current_best[1]) + " On Generation: " + str(i))
+        # print("Best Pop: " + str(current_best[1]) + " On Generation: " + str(i))
         if current_best[1] == 0:
             break
+
     count = 0
     for indiv in pop_with_fit:
         count += indiv[1]
@@ -425,22 +427,22 @@ def evolve_sudoku(init_func, gens, pop_size, fitness, tournament, cross_func, mu
 
 if __name__ == '__main__':
     # Fixed variables
-    generations = 10
-    population_size = 10
+    generations = 200
+    population_size = 400
     prob_mutation = 0.05
     prob_crossover = 0.7
     tournament_size = 2
     elite_percent = 0.01
     combs = [
-        (False, 0, 0),
-        (False, 1, 0),
+        # (False, 0, 0),
+        # (False, 1, 0),
         (False, 2, 0),
-        (True, 3, 1),
-        (True, 3, 2),
-        (True, 3, 3),
-        (True, 4, 1),
+        # (True, 3, 1),
+        # (True, 3, 2),
+        # (True, 3, 3),
+        # (True, 4, 1),
         (True, 4, 2),
-        (True, 4, 3),
+        # (True, 4, 3),
     ]
     # Get all Sudokus
     filename = "sudoku.txt"
@@ -449,6 +451,9 @@ if __name__ == '__main__':
 
     # Get random sudoku to solve and convert to int list
     for n in range(len(lines)):
+        with open(str(n) + ".txt", "a") as f:
+            print("seed,permutation,crossover,mutation,best,gens,avg", file=f)
+
         sudoku = lines[n]
         if sudoku[-1] == '\n':
             sudoku = sudoku[:-1]
@@ -475,11 +480,6 @@ if __name__ == '__main__':
             crossover_pick = comb[1]
             mutation_pick = comb[2]
 
-            best_overall = [0, 1000]
-            avg_best = 0
-            best_gens = 1000
-            avg_gens = 0
-            avg_avg = 0
             for i in range(30):
                 seed(i * 100)
                 best_indiv, gens, avg = \
@@ -489,14 +489,5 @@ if __name__ == '__main__':
                                   mutation(prob_mutation, fixed_map, disallowed_set, mutation_pick),
                                   sel_survivors_elite(elite_percent))
 
-                if best_indiv[1] < best_overall[1]:
-                    best_overall = best_indiv
-                if gens < best_gens:
-                    best_gens = gens
-                avg_best += best_indiv[1]
-                avg_gens += gens
-                avg_avg += avg
-
-            with open(str(n)+".txt", "a") as f:
-                print("{},{},{},{},{},{},{},{}".format(permutation, crossover_pick, mutation_pick, best_overall[1],
-                                                       avg_best/30, best_gens, avg_gens/30, avg_avg/30), file=f)
+                with open(str(n)+".txt", "a") as f:
+                    print("{},{},{},{},{},{},{}".format(i * 100, permutation, crossover_pick, mutation_pick, best_indiv[1], gens, avg), file=f)
